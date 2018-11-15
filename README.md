@@ -1,4 +1,4 @@
-This repository contains all MATLAB, Python and LabView codes utilized for Drones Detection and Identification (DDI) using their RF signals.
+This repository contains LabVIEW programs to acquire drone's RF signals along with MATLAB and Python scripts to detect and indetify intruding drones using their RF signatures.
 
 Drones raw RF database can be downloaded using the following link:
 
