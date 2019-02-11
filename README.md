@@ -1,5 +1,5 @@
 This repository supplements the following publication:
-M. Al-Sa'd et al. "RF-based drone detection and identification using deep learning approaches: an initiative towards a large open source drone database", 2018.
+M. Al-Sa'd et al. "RF-based drone detection and identification using deep learning approaches: an initiative towards a large open source drone database", 2019.
 
 It contains LabVIEW programs to record and process RF signals coming from intruding drones along with MATLAB and Python scripts to detect and identify those drones using their RF signatures.
 
