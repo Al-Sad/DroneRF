@@ -28,39 +28,35 @@
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 
 close all; clear; clc
-load_filename = 'G:\Data\';      % Path of raw RF data
-save_filename = load_filename;
+filepath = fileparts(pwd);
+filepath = [filepath '\Data\'];
 
 %% Parameters
-BUI{1,1} = {'00000'};                         % BUI of RF background activities
-BUI{1,2} = {'10000','10001','10010','10011'}; % BUI of the Bebop drone RF activities
-BUI{1,3} = {'10100','10101','10110','10111'}; % BUI of the AR drone RF activities
-BUI{1,4} = {'11000'};                         % BUI of the Phantom drone RF activities
+opt = 1;  % Change to 1, 2, or 3 to alternate between the 1st, 2nd, and 3rd DNN results respectively.
 
-%% Loading and concatenating RF data
-T = length(BUI);
-DATA = [];
-LN   = [];
-for t = 1:T
-    for b = 1:length(BUI{1,t})
-        load([load_filename BUI{1,t}{b} '.mat']);
-        Data = Data./max(max(Data));
-        DATA = [DATA, Data];
-        LN   = [LN size(Data,2)];
-        clear Data;
-    end
-    disp(100*t/T)
+%% Main
+y = [];
+for i = 1:10
+    x = csvread([filepath 'Results_' num2str(opt) num2str(i) '.csv']);
+    y = [y ; x];
 end
 
-%% Labeling
-zeros(3,sum(LN));
-Label(1,:) = [0*ones(1,LN(1)) 1*ones(1,sum(LN(2:end)))];
-Label(2,:) = [0*ones(1,LN(1)) 1*ones(1,sum(LN(2:5))) 2*ones(1,sum(LN(6:9))) 3*ones(1,LN(10))];
-temp = [];
-for i = 1:length(LN)
-    temp = [temp (i-1)*ones(1,LN(i))];
+%% Plotting confusion matrix
+if(opt == 1)
+    plotconfusion_mod(y(:,1:2)',y(:,3:4)');
+elseif(opt == 2)
+    plotconfusion_mod(y(:,1:4)',y(:,5:8)');
+elseif(opt == 3)
+    plotconfusion_mod(y(:,1:10)',y(:,11:20)');
+    set(gcf,'position',[100, -100, 800, 800])
 end
-Label(3,:) = temp;
+set(gcf,'Units','inches'); screenposition = get(gcf,'Position');
+set(gcf,'PaperPosition',[0 0 screenposition(3:4)],'PaperSize',screenposition(3:4));
 
 %% Saving
-csvwrite([save_filename 'RF_Data.csv'],[DATA; Label]);
+Q = input('Do you want to save the results (Y/N)\n','s');
+if(Q == 'y' || Q == 'Y')
+    print(1,['confusion_matrix_' num2str(opt)],'-dpdf','-r512');
+else
+    return
+end

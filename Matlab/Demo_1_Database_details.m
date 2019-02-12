@@ -28,39 +28,48 @@
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 
 close all; clear; clc
-load_filename = 'G:\Data\';      % Path of raw RF data
-save_filename = load_filename;
+filename = 'G:\Data\';  % Path of raw RF data
+format shortg
 
 %% Parameters
-BUI{1,1} = {'00000'};                         % BUI of RF background activities
-BUI{1,2} = {'10000','10001','10010','10011'}; % BUI of the Bebop drone RF activities
-BUI{1,3} = {'10100','10101','10110','10111'}; % BUI of the AR drone RF activities
-BUI{1,4} = {'11000'};                         % BUI of the Phantom drone RF activities
+BUI = {'00000','10000','10001','10010','10011','10100','10101','10110','10111','11000'};
+N_seg = 1e7;
 
-%% Loading and concatenating RF data
-T = length(BUI);
-DATA = [];
-LN   = [];
-for t = 1:T
-    for b = 1:length(BUI{1,t})
-        load([load_filename BUI{1,t}{b} '.mat']);
-        Data = Data./max(max(Data));
-        DATA = [DATA, Data];
-        LN   = [LN size(Data,2)];
-        clear Data;
-    end
-    disp(100*t/T)
+%% Counting
+c = zeros(1,length(BUI));
+for i = 1:length(BUI)
+    c(1,i) = length(dir([filename char(BUI{i}) '*.*']));
 end
 
-%% Labeling
-zeros(3,sum(LN));
-Label(1,:) = [0*ones(1,LN(1)) 1*ones(1,sum(LN(2:end)))];
-Label(2,:) = [0*ones(1,LN(1)) 1*ones(1,sum(LN(2:5))) 2*ones(1,sum(LN(6:9))) 3*ones(1,LN(10))];
-temp = [];
-for i = 1:length(LN)
-    temp = [temp (i-1)*ones(1,LN(i))];
-end
-Label(3,:) = temp;
+%% Level 1 details
+L1     = zeros(2,1);
+L1(1)  = N_seg*sum(c(2:end));
+L1(2)  = N_seg*c(1);
+P1     = 100.*L1./sum(L1);
 
-%% Saving
-csvwrite([save_filename 'RF_Data.csv'],[DATA; Label]);
+%% Level 2 details
+L2     = zeros(4,1);
+L2(1)  = N_seg*sum(c(2:5));
+L2(2)  = N_seg*sum(c(6:9));
+L2(3)  = N_seg*c(10);
+L2(4)  = N_seg*c(1);
+P2     = 100.*L2./sum(L2);
+
+%% Level 3 details
+L3     = zeros(10,1);
+L3(1)  = N_seg*c(2);
+L3(2)  = N_seg*c(3);
+L3(3)  = N_seg*c(4);
+L3(4)  = N_seg*c(5);
+L3(5)  = N_seg*c(6);
+L3(6)  = N_seg*c(7);
+L3(7)  = N_seg*c(8);
+L3(8)  = N_seg*c(9);
+L3(9)  = N_seg*c(10);
+L3(10) = N_seg*c(1);
+P3     = 100.*L3./sum(L3);
+
+%% Display
+disp([L1/N_seg/2 L1 P1]);
+disp([L2/N_seg/2 L2 P2]);
+disp([L3/N_seg/2 L3 P3]);
